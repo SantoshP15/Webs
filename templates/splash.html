@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>InTallygence</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/splash.css') }}">
+
+</head>
+
+<body>
+
+<div class="background"></div>
+
+<div class="hero">
+
+    <h1 class="title">
+        In<span>Tally</span>gence
+    </h1>
+    <p class="tagline">Get your Tally Insights in one click</p>
+</div>
+
+<div class="login-container">
+
+    <div class="login-box" id="login">
+
+        <h2>Login</h2>
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form action="{{ url_for('login') }}" method="POST">
+
+            <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            required>
+
+            <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required>
+
+            <button type="submit">
+                Login
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/splash.js') }}"></script>
+
+</body>
+
+</html>
