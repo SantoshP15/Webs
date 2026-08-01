@@ -1,33 +1,40 @@
-const title = document.querySelector(".title");
-const tagline = document.querySelector(".tagline");
-const login = document.querySelector(".login-box");
+const hero = document.querySelector(".hero");
+const loginContainer = document.querySelector(".login-container");
+const loginBox = document.querySelector(".login-box");
 
-window.addEventListener("scroll", () => {
+const enterBtn = document.getElementById("enterBtn");
+const backBtn = document.getElementById("backBtn");
 
-    const scroll = window.scrollY;
+// --------------------
+// Open Login
+// --------------------
 
-    // Move title upward
-    title.style.transform =
-        `translateY(-${scroll * 0.8}px)
-         scale(${1 - scroll / 1800})`;
-    tagline.style.transform =
-        `translateY(-${scroll * 0.2}px)
-         scale(${1 - scroll / 1800})`;
+enterBtn.addEventListener("click", () => {
 
-    // Fade title
-    title.style.opacity = 1 - scroll / 450;
-    tagline.style.opacity = 1 - scroll / 450;
+    hero.style.transform = "translateX(-35%) scale(.9)";
+    hero.style.opacity = "0";
 
-    // Show login
-    if(scroll > 350){
+    loginContainer.style.top = "50%";
+    loginContainer.style.transform = "translate(-50%,-50%)";
 
-        login.style.opacity = "1";
-        login.style.transform = "translateY(0)";
+    loginBox.style.opacity = "1";
+    loginBox.style.transform = "translateY(0) scale(1)";
 
-    }else{
+});
 
-        login.style.opacity = "0";
-        login.style.transform = "translateY(120px)";
-    }
+// --------------------
+// Back to Hero
+// --------------------
+
+backBtn.addEventListener("click", () => {
+
+    hero.style.transform = "translateX(0) scale(1)";
+    hero.style.opacity = "1";
+
+    loginContainer.style.top = "120%";
+    loginContainer.style.transform = "translate(-50%,0)";
+
+    loginBox.style.opacity = "0";
+    loginBox.style.transform = "translateY(60px) scale(.9)";
 
 });

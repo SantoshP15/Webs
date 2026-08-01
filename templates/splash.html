@@ -7,6 +7,9 @@
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/splash.css') }}">
+    
+    <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
 </head>
 
@@ -16,16 +19,56 @@
 
 <div class="hero">
 
+    <div class="hero-logo">
+        <img src="{{ url_for('static', filename='images/logo.png') }}">
+    </div>
+
     <h1 class="title">
         In<span>Tally</span>gence
     </h1>
-    <p class="tagline">Get your Tally Insights in one click</p>
+
+    <p class="tagline">
+        Transforming Tally Data into Business Intelligence
+    </p>
+
+<div class="hero-features">
+
+    <span>
+        <i class="fa-solid fa-chart-line"></i>
+        Real-time Analytics
+    </span>
+
+    <span class="divider"></span>
+
+    <span>
+        <i class="fa-solid fa-file-lines"></i>
+        Interactive Reports
+    </span>
+
+    <span class="divider"></span>
+
+    <span>
+        <i class="fa-solid fa-bolt"></i>
+        Smart Insights
+    </span>
+
+</div>
+
+    <button id="enterBtn">
+
+        Enter Dashboard →
+
+    </button>
+
 </div>
 
 <div class="login-container">
 
     <div class="login-box" id="login">
 
+        <button id="backBtn" class="back-btn">
+            ← Back
+        </button>
         <h2>Login</h2>
         {% if error %}
         <p class="error">{{ error }}</p>
