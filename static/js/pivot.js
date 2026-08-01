@@ -321,79 +321,63 @@ function renderFilters() {
         popup.style.position = "fixed";
         popup.style.zIndex = "99999";
 
-        // Search
+        // Date Filter
+if (DATE_COLUMNS.includes(filter.field)) {
 
-        const search = document.createElement("input");
+    createDateFilter(filter, popup, summary);
 
-        search.type = "text";
+} else {
 
-        search.placeholder = "Search...";
+    // Search
+    const search = document.createElement("input");
 
-        search.className = "filter-search";
+    search.type = "text";
+    search.placeholder = "Search...";
+    search.className = "filter-search";
 
-        popup.appendChild(search);
-        search.onkeyup = function(){
+    popup.appendChild(search);
 
-    const text = this.value.toLowerCase();
+    const checkboxContainer = document.createElement("div");
+    checkboxContainer.className = "checkbox-container";
 
-    checkboxContainer
-        .querySelectorAll(".checkbox-item")
+    popup.appendChild(checkboxContainer);
 
-        .forEach(item=>{
+    search.onkeyup = function () {
 
-            if(item.innerText
-                .toLowerCase()
-                .includes(text))
+        const text = this.value.toLowerCase();
 
-                item.style.display="flex";
+        checkboxContainer
+            .querySelectorAll(".checkbox-item")
+            .forEach(item => {
 
-            else
+                item.style.display =
+                    item.innerText.toLowerCase().includes(text)
+                    ? "flex"
+                    : "none";
 
-                item.style.display="none";
+            });
 
-        });
+    };
 
-};
+    loadFilterValues(
+        filter.field,
+        checkboxContainer,
+        filter,
+        summary,
+        popup
+    );
 
-        // Checkbox Container
+    const applyBtn = document.createElement("button");
 
-        const checkboxContainer = document.createElement("div");
-        if (DATE_COLUMNS.includes(filter.field)) {
+    applyBtn.className = "apply-filter";
 
-            createDateFilter(
-                filter,
-                popup,
-                summary
-            );
+    applyBtn.innerText = "Apply";
 
-        }
-        else{
+    popup.appendChild(applyBtn);
 
-            loadFilterValues(
-                filter.field,
-                checkboxContainer,
-                filter,
-                summary,
-                popup
-            );
+}
 
-        }
-
-        checkboxContainer.className = "checkbox-container";
-
-        popup.appendChild(checkboxContainer);
-
-        // Apply Button
-
-        const applyBtn = document.createElement("button");
-
-        applyBtn.className = "apply-filter";
-
-        applyBtn.innerText = "Apply";
-
-        popup.appendChild(applyBtn);
-
-        document.body.appendChild(popup);
+document.body.appendChild(popup);
 
         // Open / Close Popup
 
@@ -831,57 +815,42 @@ function createDateFilter(filter, popup, summary) {
 
     popup.innerHTML = "";
 
-    // ===========================
-    // Header
-    // ===========================
+    // Date input
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "date-picker";
+    input.placeholder = "Select Date";
 
-    const header = document.createElement("div");
+    popup.appendChild(input);
 
-    header.className = "date-filter-header";
+    // Apply button
+    const apply = document.createElement("button");
+    apply.className = "apply-date";
+    apply.innerText = "Apply";
 
-    header.innerHTML = `
-        <span>${filter.field}</span>
-        <span class="close-popup">&times;</span>
-    `;
+    popup.appendChild(apply);
 
-    popup.appendChild(header);
+    // Initialize Flatpickr
+    flatpickr(input, {
+        dateFormat: "d-M-y",
+        allowInput: false
+    });
 
-    // ===========================
-    // Tabs
-    // ===========================
+    apply.onclick = function () {
 
-    const tabs = document.createElement("div");
+        if (input.value) {
 
-    tabs.className = "date-tabs";
+            filter.selected = [input.value];
+            summary.innerHTML = input.value;
 
-    const hierarchyBtn = document.createElement("button");
+        } else {
 
-    hierarchyBtn.innerText = "Hierarchy";
+            filter.selected = [];
+            summary.innerHTML = "Select Date ▼";
 
-    hierarchyBtn.className = "active-tab";
+        }
 
-    const rangeBtn = document.createElement("button");
-
-    rangeBtn.innerText = "Date Range";
-
-    tabs.appendChild(hierarchyBtn);
-
-    tabs.appendChild(rangeBtn);
-
-    popup.appendChild(tabs);
-
-    // ===========================
-    // Body
-    // ===========================
-
-    const body = document.createElement("div");
-
-    body.className = "date-filter-body";
-
-    popup.appendChild(body);
-
-    body.innerHTML = `
-        <h4>Coming in next step...</h4>
-    `;
+        popup.style.display = "none";
+    };
 
 }

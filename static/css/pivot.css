@@ -458,7 +458,7 @@ Filter dropdown
 
     margin-top:5px;
 
-    width:260px;
+    width:320px;
 
     background:#fff;
 
@@ -468,7 +468,7 @@ Filter dropdown
 
     box-shadow:0 10px 25px rgba(0,0,0,.15);
 
-    padding:10px;
+    padding:15px;
 
     z-index:999;
 
@@ -678,19 +678,19 @@ Filter dropdown
 .apply-date{
 
     width:100%;
-
     height:40px;
-
-    border:none;
 
     background:#FFBF00;
 
+    border:none;
+
     border-radius:8px;
+
+    font-weight:600;
 
     cursor:pointer;
 
-    font-weight:bold;
-
+    margin-top:10px;
 }
 
 .coming-soon{
@@ -700,5 +700,26 @@ Filter dropdown
     margin-top:50px;
 
     color:#666;
+
+}
+.date-picker{
+
+    width:100%;
+    height:40px;
+
+    border:1px solid #ccc;
+    border-radius:8px;
+
+    padding:0 12px;
+
+    font-size:14px;
+
+    margin-bottom:12px;
+}
+
+.flatpickr-calendar{
+
+    font-family:Poppins,sans-serif;
+    z-index: 999999 !important;
 
 }

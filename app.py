@@ -116,6 +116,10 @@ def pivot():
     columns = []
 
     date_columns = []
+    MANUAL_DATE_COLUMNS = {
+    "Invoice Date",
+    "Document Date"
+    }
 
     for col in column_info:
 
@@ -125,7 +129,7 @@ def pivot():
 
         columns.append(column_name)
 
-        if "date" in column_type or "time" in column_type:
+        if "date" in column_type or "time" in column_type or column_name in MANUAL_DATE_COLUMNS:
 
             date_columns.append(column_name)
 
@@ -331,12 +335,18 @@ END
         if not values:
             continue
 
-        escaped = [
+        from datetime import datetime
 
-            "'" + str(v).replace("'", "''") + "'"
+        escaped = []
 
-            for v in values
-        ]
+        for v in values:
+
+            try:
+                v = datetime.strptime(str(v), "%d-%b-%y").strftime("%Y-%m-%d")
+            except ValueError:
+                pass
+
+            escaped.append("'" + str(v).replace("'", "''") + "'")
 
         where_clause.append(
 
