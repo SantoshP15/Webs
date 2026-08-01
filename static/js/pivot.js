@@ -318,6 +318,8 @@ function renderFilters() {
 
 
         popup.style.display = "none";
+        popup.style.position = "fixed";
+        popup.style.zIndex = "99999";
 
         // Search
 
@@ -391,7 +393,7 @@ function renderFilters() {
 
         popup.appendChild(applyBtn);
 
-        left.appendChild(popup);
+        document.body.appendChild(popup);
 
         // Open / Close Popup
 
@@ -408,10 +410,15 @@ function renderFilters() {
 
                 });
 
+            const rect = summary.getBoundingClientRect();
+
+            popup.style.left = rect.left + "px";
+            popup.style.top = (rect.bottom + 5) + "px";
+
             popup.style.display =
                 popup.style.display === "block"
-                ? "none"
-                : "block";
+                    ? "none"
+                    : "block";
 
         };
 
@@ -425,6 +432,8 @@ function renderFilters() {
         remove.innerHTML = "&times;";
 
         remove.onclick = function () {
+
+            popup.remove();
 
             pivotConfig.filters.splice(index, 1);
 
