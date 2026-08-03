@@ -454,7 +454,11 @@ function addFilter() {
 
         field: field,
 
-        selected: []
+        selected: [],
+
+        from: "",
+
+        to: ""
 
     });
 
@@ -632,14 +636,43 @@ function loadFilterValues(field, container, filter, summary, popup) {
 function getFilters() {
 
     return pivotConfig.filters
-        .filter(f => f.selected.length > 0)
-        .map(f => ({
+        .filter(f => {
 
-            field: f.field,
+            // Date filter
+            if (f.from && f.to)
+                return true;
 
-            values: f.selected
+            // Normal filter
+            return f.selected && f.selected.length > 0;
 
-        }));
+        })
+        .map(f => {
+
+            // Date Range
+            if (f.from && f.to) {
+
+                return {
+
+                    field: f.field,
+
+                    from: f.from,
+
+                    to: f.to
+
+                };
+
+            }
+
+            // Normal Filter
+            return {
+
+                field: f.field,
+
+                values: f.selected
+
+            };
+
+        });
 
 }
 // ================================
@@ -815,42 +848,91 @@ function createDateFilter(filter, popup, summary) {
 
     popup.innerHTML = "";
 
-    // Date input
-    const input = document.createElement("input");
-    input.type = "text";
-    input.className = "date-picker";
-    input.placeholder = "Select Date";
+    // --------------------------
+    // FROM DATE
+    // --------------------------
 
-    popup.appendChild(input);
+    const fromLabel = document.createElement("label");
+    fromLabel.innerText = "From";
 
-    // Apply button
+    popup.appendChild(fromLabel);
+
+    const fromInput = document.createElement("input");
+    fromInput.type = "text";
+    fromInput.className = "date-picker";
+    fromInput.placeholder = "Start Date";
+
+    popup.appendChild(fromInput);
+
+    // --------------------------
+    // TO DATE
+    // --------------------------
+
+    const toLabel = document.createElement("label");
+    toLabel.innerText = "To";
+
+    popup.appendChild(toLabel);
+
+    const toInput = document.createElement("input");
+    toInput.type = "text";
+    toInput.className = "date-picker";
+    toInput.placeholder = "End Date";
+
+    popup.appendChild(toInput);
+
+    // --------------------------
+    // APPLY
+    // --------------------------
+
     const apply = document.createElement("button");
+
     apply.className = "apply-date";
+
     apply.innerText = "Apply";
 
     popup.appendChild(apply);
 
-    // Initialize Flatpickr
-    flatpickr(input, {
-        dateFormat: "d-M-y",
-        allowInput: false
+    // --------------------------
+    // Flatpickr
+    // --------------------------
+
+    flatpickr(fromInput, {
+
+        dateFormat: "Y-m-d"
+
     });
+
+    flatpickr(toInput, {
+
+        dateFormat: "Y-m-d"
+
+    });
+
+    // --------------------------
+    // Apply
+    // --------------------------
 
     apply.onclick = function () {
 
-        if (input.value) {
+        filter.from = fromInput.value;
 
-            filter.selected = [input.value];
-            summary.innerHTML = input.value;
+        filter.to = toInput.value;
 
-        } else {
+        if (filter.from && filter.to) {
 
-            filter.selected = [];
-            summary.innerHTML = "Select Date ▼";
+            summary.innerHTML =
+                filter.from + " → " + filter.to;
+
+        }
+        else {
+
+            summary.innerHTML =
+                "Select Date Range ▼";
 
         }
 
         popup.style.display = "none";
+
     };
 
 }

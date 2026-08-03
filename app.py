@@ -321,6 +321,8 @@ END
     # WHERE
     # -------------------------
 
+    from datetime import datetime
+
     where_clause = []
 
     for f in filters:
@@ -330,16 +332,33 @@ END
         if field not in valid_columns:
             continue
 
-        values = f.get("values", [])
+    # ======================================
+    # DATE RANGE FILTER
+    # ======================================
 
-        if not values:
+        if f.get("from") and f.get("to"):
+
+            from_date = f["from"]
+            to_date = f["to"]
+
+            where_clause.append(
+                f"`{field}` BETWEEN '{from_date}' AND '{to_date}'"
+            )
+
             continue
 
-        from datetime import datetime
+    # ======================================
+    # NORMAL FILTERS
+    # ======================================
+
+        filter_values = f.get("values", [])
+
+        if not filter_values:
+            continue
 
         escaped = []
 
-        for v in values:
+        for v in filter_values:
 
             try:
                 v = datetime.strptime(str(v), "%d-%b-%y").strftime("%Y-%m-%d")
@@ -349,27 +368,30 @@ END
             escaped.append("'" + str(v).replace("'", "''") + "'")
 
         where_clause.append(
-
             f"`{field}` IN ({','.join(escaped)})"
         )
-    where_sql = ""  
+    
+    # -------------------------
+    # BUILD WHERE SQL
+    # -------------------------
+
+    where_sql = ""
 
     if where_clause:
 
         where_sql = "WHERE " + " AND ".join(where_clause)
-
     # -------------------------
     # FINAL SQL
     # -------------------------
 
     sql = f"""
-SELECT
-    {",".join(select_clause)}
-FROM SalesMaster
-{where_sql}
-GROUP BY
-    {",".join(group_clause)}
-"""
+    SELECT
+        {",".join(select_clause)}
+    FROM SalesMaster
+    {where_sql}
+    GROUP BY
+        {",".join(group_clause)}
+    """
 
     cursor.close()
     db.close()
