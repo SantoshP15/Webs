@@ -702,6 +702,7 @@ function renderTable(response) {
 
     const table = document.createElement("table");
     table.className = "pivot-table";
+    table.id = "pivotTable";
 
     // Header
     const thead = document.createElement("thead");
@@ -799,6 +800,12 @@ function renderTable(response) {
     tbody.appendChild(totalRow);
     table.appendChild(tbody);
     output.appendChild(table);
+    new DataTable('#pivotTable', {
+        ordering: true,
+        searching: true,
+        paging: true,
+        pageLength: 25
+    });
 
 }
 // ================================
