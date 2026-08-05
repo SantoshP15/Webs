@@ -194,6 +194,59 @@ def filter_values(column):
 
     return jsonify(values)
 
+from collections import defaultdict
+
+
+@app.route("/date-hierarchy/<path:column>")
+def date_hierarchy(column):
+
+    if "user" not in session:
+        return jsonify({})
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    query = f"""
+        SELECT DISTINCT
+            `{column}` AS FullDate,
+            YEAR(`{column}`) AS YearNo,
+            MONTH(`{column}`) AS MonthNo,
+            MONTH(`{column}`) AS MonthNo,
+            MONTHNAME(`{column}`) AS MonthName,
+            DAY(`{column}`) AS DayNo
+        FROM SalesMaster
+        WHERE `{column}` IS NOT NULL
+        ORDER BY
+            YEAR(`{column}`),
+            MONTH(`{column}`),
+            DAY(`{column}`)
+    """
+
+    cursor.execute(query)
+
+    rows = cursor.fetchall()
+
+    cursor.close()
+    db.close()
+
+    hierarchy = {}
+
+    for row in rows:
+
+        year = str(row["YearNo"])
+        month = row["MonthName"]
+        date = row["FullDate"].strftime("%Y-%m-%d")
+
+        if year not in hierarchy:
+            hierarchy[year] = {}
+
+        if month not in hierarchy[year]:
+            hierarchy[year][month] = []
+
+        hierarchy[year][month].append(date)
+
+    return jsonify(hierarchy)
+
 def build_query(config):
 
     rows = config.get("rows", [])
@@ -331,10 +384,26 @@ END
 
         if field not in valid_columns:
             continue
+    # ======================================
+# DATE HIERARCHY FILTER
+# ======================================
 
-    # ======================================
-    # DATE RANGE FILTER
-    # ======================================
+        if f.get("selectedDates"):
+
+            selected = []
+
+            for d in f["selectedDates"]:
+
+                selected.append("'" + str(d).replace("'", "''") + "'")
+
+            where_clause.append(
+                f"`{field}` IN ({','.join(selected)})"
+            )
+
+            continue    
+            # ======================================
+            # DATE RANGE FILTER
+            # ======================================
 
         if f.get("from") and f.get("to"):
 

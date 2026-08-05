@@ -318,7 +318,7 @@ function renderFilters() {
 
 
         popup.style.display = "none";
-        popup.style.position = "fixed";
+        popup.style.position = "absolute";
         popup.style.zIndex = "99999";
 
         // Date Filter
@@ -455,6 +455,8 @@ function addFilter() {
         field: field,
 
         selected: [],
+
+        selectedDates: [],
 
         from: "",
 
@@ -638,38 +640,54 @@ function getFilters() {
     return pivotConfig.filters
         .filter(f => {
 
-            // Date filter
+            // Date Hierarchy
+            if (f.selectedDates && f.selectedDates.length > 0)
+                return true;
+
+            // Date Range
             if (f.from && f.to)
                 return true;
 
-            // Normal filter
+            // Normal Filter
             return f.selected && f.selected.length > 0;
 
         })
         .map(f => {
 
-            // Date Range
-            if (f.from && f.to) {
+            // ==========================
+            // Date Hierarchy
+            // ==========================
+
+            if (f.selectedDates && f.selectedDates.length > 0) {
 
                 return {
-
                     field: f.field,
-
-                    from: f.from,
-
-                    to: f.to
-
+                    selectedDates: f.selectedDates
                 };
 
             }
 
+            // ==========================
+            // Date Range
+            // ==========================
+
+            if (f.from && f.to) {
+
+                return {
+                    field: f.field,
+                    from: f.from,
+                    to: f.to
+                };
+
+            }
+
+            // ==========================
             // Normal Filter
+            // ==========================
+
             return {
-
                 field: f.field,
-
                 values: f.selected
-
             };
 
         });
@@ -847,6 +865,8 @@ function generatePivot() {
     filters: getFilters()
 
     };
+    console.log(requestData);
+    console.log(JSON.stringify(requestData, null, 2));
 
     fetch("/generate-pivot", {
 
@@ -859,6 +879,8 @@ function generatePivot() {
     body: JSON.stringify(requestData)
 
     })
+
+    
 
     .then(response => response.json())
 
@@ -941,6 +963,50 @@ function createDateFilter(filter, popup, summary) {
     popup.appendChild(apply);
 
     // --------------------------
+    // Hierarchy Title
+    // --------------------------
+
+    const hr = document.createElement("hr");
+    popup.appendChild(hr);
+
+    const heading = document.createElement("div");
+
+    heading.className = "date-heading";
+    heading.innerHTML = "<strong>Browse Dates</strong>";
+
+    popup.appendChild(heading);
+
+// --------------------------
+// Search Box
+// --------------------------
+
+    const search = document.createElement("input");
+
+    search.type = "text";
+    search.placeholder = "Search...";
+    search.className = "filter-search";
+
+    popup.appendChild(search);
+
+// --------------------------
+// Hierarchy Container
+// --------------------------
+
+    const hierarchyContainer = document.createElement("div");
+
+    hierarchyContainer.className = "date-tree";
+
+    popup.appendChild(hierarchyContainer);
+
+// Load hierarchy
+
+    loadDateHierarchy(
+        filter.field,
+        hierarchyContainer,
+        filter
+    );
+
+    // --------------------------
     // Flatpickr
     // --------------------------
 
@@ -962,25 +1028,238 @@ function createDateFilter(filter, popup, summary) {
 
     apply.onclick = function () {
 
-        filter.from = fromInput.value;
+    // If user entered a custom range, use it
+        if (fromInput.value && toInput.value) {
 
-        filter.to = toInput.value;
+            filter.selectedDates = [];
 
-        if (filter.from && filter.to) {
+            filter.from = fromInput.value;
+            filter.to = toInput.value;
 
             summary.innerHTML =
                 filter.from + " → " + filter.to;
 
         }
+    // Otherwise keep hierarchy selection
         else {
 
-            summary.innerHTML =
-                "Select Date Range ▼";
+            filter.from = "";
+            filter.to = "";
+
+            if (filter.selectedDates.length > 0) {
+
+                summary.innerHTML =
+                    filter.selectedDates.length + " date(s) selected";
+
+            } else {
+
+                summary.innerHTML = "Select Date Range ▼";
+
+            }
 
         }
 
         popup.style.display = "none";
 
     };
+
+}
+function loadDateHierarchy(field, container, filter)
+{
+    container.innerHTML = "Loading...";
+
+    fetch("/date-hierarchy/" + encodeURIComponent(field))
+    .then(r => r.json())
+    .then(data => {
+
+        container.innerHTML = "";
+
+        if(!filter.selectedDates)
+            filter.selectedDates=[];
+
+        Object.keys(data).forEach(year=>{
+
+            // ======================
+            // YEAR
+            // ======================
+
+            const yearDiv=document.createElement("div");
+            yearDiv.className="tree-year";
+
+            const yearHeader=document.createElement("div");
+            yearHeader.className="tree-header";
+
+            const yearToggle=document.createElement("span");
+            yearToggle.innerHTML="▶";
+
+            const yearCheck=document.createElement("input");
+            yearCheck.type="checkbox";
+
+            const yearText=document.createElement("span");
+            yearText.innerText=" "+year;
+
+            yearHeader.appendChild(yearToggle);
+            yearHeader.appendChild(yearCheck);
+            yearHeader.appendChild(yearText);
+
+            yearDiv.appendChild(yearHeader);
+
+            const yearBody=document.createElement("div");
+            yearBody.className="tree-body";
+            yearBody.style.display="none";
+
+            yearDiv.appendChild(yearBody);
+
+            // expand collapse
+
+            yearToggle.onclick=function(){
+
+                if(yearBody.style.display==="none"){
+
+                    yearBody.style.display="block";
+                    yearToggle.innerHTML="▼";
+
+                }else{
+
+                    yearBody.style.display="none";
+                    yearToggle.innerHTML="▶";
+
+                }
+
+            };
+
+            // ======================
+            // MONTH
+            // ======================
+
+            Object.keys(data[year]).forEach(month=>{
+
+                const monthDiv=document.createElement("div");
+                monthDiv.className="tree-month";
+
+                const monthHeader=document.createElement("div");
+                monthHeader.className="tree-header";
+
+                const monthToggle=document.createElement("span");
+                monthToggle.innerHTML="▶";
+
+                const monthCheck=document.createElement("input");
+                monthCheck.type="checkbox";
+
+                const monthText=document.createElement("span");
+                monthText.innerText=" "+month;
+
+                monthHeader.appendChild(monthToggle);
+                monthHeader.appendChild(monthCheck);
+                monthHeader.appendChild(monthText);
+
+                monthDiv.appendChild(monthHeader);
+
+                const monthBody=document.createElement("div");
+                monthBody.className="tree-body";
+                monthBody.style.display="none";
+
+                monthDiv.appendChild(monthBody);
+
+                monthToggle.onclick=function(){
+
+                    if(monthBody.style.display==="none"){
+
+                        monthBody.style.display="block";
+                        monthToggle.innerHTML="▼";
+
+                    }else{
+
+                        monthBody.style.display="none";
+                        monthToggle.innerHTML="▶";
+
+                    }
+
+                };
+
+                // ======================
+                // DATES
+                // ======================
+
+                data[year][month].forEach(date=>{
+
+                    const label=document.createElement("label");
+                    label.className="checkbox-item";
+
+                    const check=document.createElement("input");
+
+                    check.type="checkbox";
+                    check.value=date;
+
+                    if(filter.selectedDates.includes(date))
+                        check.checked=true;
+
+                    check.onchange = function () {
+
+                        console.log("Clicked:", date);
+
+                        if (!filter.selectedDates)
+                            filter.selectedDates = [];
+
+                        if (this.checked) {
+
+                            if (!filter.selectedDates.includes(date))
+                                filter.selectedDates.push(date);
+
+                        } else {
+
+                            filter.selectedDates =
+                                filter.selectedDates.filter(d => d !== date);
+
+                        }
+
+                        console.log("selectedDates =", filter.selectedDates);
+                        console.log("Length =", filter.selectedDates.length);
+                        console.log("pivotConfig =", pivotConfig.filters);
+
+                    };
+
+                    label.appendChild(check);
+                    label.append(" "+date);
+
+                    monthBody.appendChild(label);
+
+                });
+
+                // Month select all
+
+                monthCheck.onchange=function(){
+
+                    monthBody.querySelectorAll("input").forEach(c=>{
+
+                        c.checked=this.checked;
+                        c.dispatchEvent(new Event("change"));
+
+                    });
+
+                };
+
+                yearBody.appendChild(monthDiv);
+
+            });
+
+            // Year select all
+
+            yearCheck.onchange=function(){
+
+                yearBody.querySelectorAll("input").forEach(c=>{
+
+                    c.checked=this.checked;
+                    c.dispatchEvent(new Event("change"));
+
+                });
+
+            };
+
+            container.appendChild(yearDiv);
+
+        });
+
+    });
 
 }
