@@ -416,7 +416,7 @@ body::-webkit-scrollbar{
 
 .title span{
 
-    color:#07375e;
+    color:#ffc400;
 
     animation:glow 2s infinite;
 
@@ -428,9 +428,9 @@ body::-webkit-scrollbar{
 
         text-shadow:
 
-        0 0 20px #dfba16,
+        0 0 2px #1b81e0,
 
-        0 0 45px #8e9499;
+        0 0 4px #206da0;
 
     }
 

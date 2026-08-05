@@ -723,3 +723,16 @@ Filter dropdown
     z-index: 999999 !important;
 
 }
+.grand-total{
+
+    background:#FFE08A;
+
+    font-weight:bold;
+
+}
+
+.grand-total td{
+
+    border-top:3px solid #FFBF00;
+
+}

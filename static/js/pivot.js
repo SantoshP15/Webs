@@ -721,22 +721,31 @@ function renderTable(response) {
     // Body
     const tbody = document.createElement("tbody");
 
-    data.forEach(row => {
+    // Store totals for numeric columns
+    const totals = {};
+
+    columns.forEach(col => totals[col] = 0);
+
+    data.forEach((row, rowIndex) => {
 
         const tr = document.createElement("tr");
 
-        columns.forEach(col => {
+        columns.forEach((col, colIndex) => {
 
             const td = document.createElement("td");
 
             let value = row[col];
 
             if (value === null || value === undefined)
-                value = "";
+            value = "";
 
             if (!isNaN(value) && value !== "") {
 
-                td.innerText = Number(value).toLocaleString("en-IN");
+                const num = Number(value);
+
+                totals[col] += num;
+
+                td.innerText = num.toLocaleString("en-IN");
 
                 td.style.textAlign = "right";
 
@@ -755,8 +764,40 @@ function renderTable(response) {
 
     });
 
-    table.appendChild(tbody);
 
+// =======================================
+// Grand Total Row
+// =======================================
+
+    const totalRow = document.createElement("tr");
+    totalRow.className = "grand-total";
+
+    columns.forEach((col, index) => {
+
+        const td = document.createElement("td");
+
+        if (index === 0) {
+
+            td.innerHTML = "<strong>Grand Total</strong>";
+
+        }
+        else if (totals[col] !== 0) {
+
+            td.innerHTML =
+                "<strong>" +
+                totals[col].toLocaleString("en-IN") +
+                "</strong>";
+
+            td.style.textAlign = "right";
+
+        }
+
+        totalRow.appendChild(td);
+
+    });
+
+    tbody.appendChild(totalRow);
+    table.appendChild(tbody);
     output.appendChild(table);
 
 }
